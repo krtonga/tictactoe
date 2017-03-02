@@ -50,7 +50,7 @@ public class Board {
                 oldChar = mBoard.charAt(i);
                 newChar = newBoard.charAt(i);
                 if (oldChar != newChar) {
-                    if (newChar != CLIENT) {
+                    if (newChar != CLIENT || oldChar != BLANK) {
                         return false;
                     }
                     differenceCount++;
