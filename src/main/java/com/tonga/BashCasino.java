@@ -1,13 +1,6 @@
-package com.tonga.main;
-
-import com.tonga.main.Game;
+package com.tonga;
 
 import java.util.Scanner;
-
-import static com.tonga.main.Board.BLANK;
-import static com.tonga.main.Board.CLIENT;
-import static com.tonga.main.Board.SERVER;
-import static com.tonga.main.Game.TIE;
 
 /**
  * This is used to play a TicTacToe game via the command line.
@@ -15,19 +8,19 @@ import static com.tonga.main.Game.TIE;
  * Assuming that the JDK is in your classpath, to run from the command line,
  * cd into the `src` directory and run the following:
  *      javac -cp . com/tonga/main/*.java
- *      java -cp . com/tonga/main/CommandLineCasino
+ *      java -cp . com/tonga/main/BashCasino
  *
  */
-public class CommandLineCasino {
+public class BashCasino {
     public static void main(String[] args) {
-        char winner = BLANK;
+        char winner = Board.BLANK;
         String userMove;
         Game game = new Game();
 
         Scanner in = new Scanner(System.in);
         System.out.println("Send a board to begin playing.");
         System.out.println("Type 'q' or 'quit' at any time to stop.");
-        while (winner == BLANK) {
+        while (winner == Board.BLANK) {
             userMove = in.nextLine();
             if (userMove.equals("quit") || userMove.equals("q")) {
                 winner = 'q';
@@ -54,11 +47,11 @@ public class CommandLineCasino {
 
     private static String congratulateWinner(char winner) {
         switch (winner) {
-            case TIE :
+            case Game.TIE :
                 return "Game was tied.\nSend a new board to start the game again.";
-            case CLIENT :
+            case Board.CLIENT :
                 return "Good job! You won.\nSend a new board to start the game again.";
-            case SERVER :
+            case Board.SERVER :
                 return "API won!\nSend a new board to start the game again.";
             default :
                 return "";

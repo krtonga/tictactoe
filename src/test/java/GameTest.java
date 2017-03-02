@@ -1,8 +1,5 @@
-package com.tonga.test;
-
-
 import org.junit.Test;
-import com.tonga.main.Game;
+import com.tonga.Game;
 
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.*;

@@ -1,4 +1,4 @@
-package com.tonga.main;
+package com.tonga;
 
 import java.util.Random;
 /**
@@ -37,7 +37,7 @@ public class Board {
                         (board.matches(validFirstBoardRegex) && board.indexOf(CLIENT) == board.lastIndexOf(CLIENT)));
     }
 
-    boolean isValidBoard(String board) {
+    private boolean isValidBoard(String board) {
         return board.length() == 9 && board.matches(validBoardRegex);
     }
 

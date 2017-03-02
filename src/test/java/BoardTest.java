@@ -1,7 +1,4 @@
-package com.tonga.test;
-
-
-import com.tonga.main.Board;
+import com.tonga.Board;
 import org.junit.Test;
 
 import static junit.framework.TestCase.assertEquals;
