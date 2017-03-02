@@ -37,6 +37,11 @@ public class ApiCasino {
             return new TicTacToeError();
         }, json());
 
+        get("/tictactoe/new", (req, res) -> {
+            mGame = new Game();
+            return new TicTacToeResponse(200, "+++++++++", BLANK);
+        }, json());
+
         after((request, response) -> response.type("application/json"));
     }
 
