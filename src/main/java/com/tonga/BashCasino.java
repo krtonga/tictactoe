@@ -26,12 +26,12 @@ public class BashCasino {
                 winner = 'q';
             }
 
-            String serverMove = game.sendBoard(userMove);
+            Brains.MoveResult serverMove = game.playGame(userMove);
             if (serverMove == null) {
                 System.out.println("!! ERROR: 400 !!");
             } else {
                 System.out.println(prettyBoard("USER", userMove));
-                System.out.println(prettyBoard("SERVER", serverMove));
+                System.out.println(prettyBoard("SERVER", serverMove.getServerMove()));
             }
             System.out.println(congratulateWinner(game.getWinner()));
         }

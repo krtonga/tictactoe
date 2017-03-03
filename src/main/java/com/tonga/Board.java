@@ -31,17 +31,21 @@ public class Board {
         return mBoard;
     }
 
+    public void updateBoard(String newBoard) {
+        mBoard = newBoard;
+    }
+
     public static boolean isValidFirst(String board) {
         return board.length() == 9 &&
                 (board.matches(emptyBoardRegex) ||
                         (board.matches(validFirstBoardRegex) && board.indexOf(CLIENT) == board.lastIndexOf(CLIENT)));
     }
 
-    private boolean isValidBoard(String board) {
+    static boolean isValidBoard(String board) {
         return board.length() == 9 && board.matches(validBoardRegex);
     }
 
-    public boolean update(String newBoard) {
+    public boolean isValidUpdate(String newBoard) {
         if (isValidBoard(newBoard)) {
             int differenceCount = 0;
             char oldChar;
@@ -60,7 +64,6 @@ public class Board {
                 }
             }
             if (differenceCount == 1) {
-                mBoard = newBoard;
                 return true;
             }
         }
@@ -81,6 +84,42 @@ public class Board {
 
     public int getAnO() {
         return mBoard.indexOf(SERVER);
+    }
+
+    public SymbolCountResult getMoveCounts() {
+        int numX = (int) mBoard.chars().filter(ch -> ch == CLIENT).count();
+        int numO = (int) mBoard.chars().filter(ch -> ch == SERVER).count();
+        return new SymbolCountResult(numX, numO);
+    }
+
+    public static class SymbolCountResult {
+        int totalMoves;
+        int numClientMoves;
+        int numServerMoves;
+        boolean isValid;
+
+        SymbolCountResult(int numClientMoves, int numServerMoves) {
+            this.numClientMoves = numClientMoves;
+            this.numServerMoves = numServerMoves;
+            this.totalMoves = numClientMoves + numServerMoves;
+            isValid = numServerMoves == numClientMoves || numServerMoves == numClientMoves-1;
+        }
+
+        public int getTotalNumOfMoves() {
+            return totalMoves;
+        }
+
+        public int getNumOfClientMoves() {
+            return numClientMoves;
+        }
+
+        public int getNumOfServerMoves() {
+            return numServerMoves;
+        }
+
+        public boolean isValidMove() {
+            return isValid;
+        }
     }
 
     public boolean hasThreeInARow(char symbol) {

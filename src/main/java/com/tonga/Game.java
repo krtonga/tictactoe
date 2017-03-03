@@ -1,7 +1,7 @@
 package com.tonga;
 
-import javax.jws.WebParam;
-import javax.jws.WebService;
+import static com.tonga.Board.BLANK;
+import static com.tonga.Board.isValidFirst;
 
 /**
  * This class represents a TicTacToe game.
@@ -10,8 +10,12 @@ public class Game {
     public static final char TIE = 't';
 
     private Board mBoard;
-    private int updateCount;
-    private char winner;
+    private Brains mBrains;
+    private Brains.MoveResult mLastValidMove;
+
+    public Game() {
+        mBrains = new Brains();
+    }
 
     /**
      * This method will take a string representation of a TicTacToe board,
@@ -24,139 +28,50 @@ public class Game {
      *
      * If the client sends an invalid input, this method will return null.
      */
-    public String sendBoard(String board) {
+    public Brains.MoveResult playGame(String clientMove) {
         if (mBoard == null) {
-            winner = Board.BLANK; // reset for round of game
-            if (Board.isValidFirst(board)) {
-                mBoard = new Board(board);
-                winner = Board.BLANK;
-                return prepareResponse(makeFirstMove());
+            if (isValidFirst(clientMove)) {
+                mBoard = new Board(clientMove);
+                return makeMove();
+            } else {
+                return null;
             }
-        }
-        else if (mBoard.update(board)) {
-            updateCount++;
-            if (updateCount == 2) {
-                return prepareResponse(makeThirdMove());
-            }
-            if (updateCount == 3) {
-                return prepareResponse(makeForthMove());
-            }
-            else {
-                boolean winOrTie = checkForWinner(Board.CLIENT);
-                if (winOrTie) {
-                    resetGame();
-                    return board;
-                }
-                return prepareResponse(makeSubsequentMoves());
-            }
+        } else if (mBoard.isValidUpdate(clientMove)) {
+            mBoard.updateBoard(clientMove);
+            return makeMove();
         }
         return null; // invalid board sent
     }
 
+    private Brains.MoveResult makeMove() {
+        Brains.MoveResult serverMove = mBrains.makeOptimalMove(mBoard);
+        if (serverMove != null) {
+            if (serverMove.getWinner() == BLANK) {
+                mBoard.updateBoard(serverMove.getServerMove());
+                mLastValidMove = serverMove;
+            } else {
+                resetGame(); // someone has won, so start over
+            }
+        }
+        return serverMove;
+    }
+
     public char getWinner() {
-        return winner;
+        if (mLastValidMove != null) {
+            return mLastValidMove.getWinner();
+        }
+        return BLANK;
     }
 
-    public int getUpdateCount() {
-        return updateCount;
-    }
-
-    String getLastValidBoard() {
+    public String getLastValidBoard() {
         if (mBoard == null) {
             return null;
         }
         return mBoard.toString();
     }
 
-    private boolean checkForWinner(char symbol) {
-        if (!mBoard.hasFreeSpaces()) {
-            winner = TIE;
-        }
-        if (mBoard.hasThreeInARow(symbol)) {
-            winner = symbol;
-        }
-        return winner != Board.BLANK;
-    }
-
-    private void resetGame() {
+    void resetGame() {
         mBoard = null;
-        updateCount = 0;
-    }
-
-    private String prepareResponse(String logicalResponse) {
-        if (logicalResponse == null) {
-            logicalResponse = mBoard.makeDefaultMove();
-        }
-        if (logicalResponse != null) {
-            updateCount++;
-        }
-        if(checkForWinner(Board.SERVER)) {
-            resetGame();
-        }
-        return logicalResponse;
-    }
-
-    private String makeFirstMove() {
-        // server can make first move
-        if (mBoard.isEmpty()) {
-            return mBoard.makeCornerMove();
-        }
-
-        // client made first move
-        updateCount++;
-        int x = mBoard.getAnX();
-        if (mBoard.isInCorner(Board.CLIENT)) {
-            return mBoard.makeCenterMove();
-        }
-        if (mBoard.isInCenter(Board.CLIENT)) {
-            return mBoard.makeMove(mBoard.getOppositeCorner(x));
-        }
-        if (mBoard.isOnEdge(Board.CLIENT)) {
-            return mBoard.moveAdjacentCorner(x);
-        }
-        return null;
-    }
-
-    // server made first move
-    private String makeThirdMove() {
-        if (mBoard.isInCenter(Board.CLIENT)) {
-            return mBoard.moveAdjacentCorner(mBoard.getAnO());
-        }
-        else if (mBoard.isOnEdge(Board.CLIENT)) {
-            return mBoard.makeCenterMove();
-        }
-        else if (mBoard.isInCorner(Board.CLIENT)) {
-            return mBoard.makeCornerMove();
-        }
-        return null;
-    }
-
-    // client made first move
-    private String makeForthMove() {
-        String serverMove;
-        int blocking = mBoard.getBlockingMove(Board.CLIENT);
-        serverMove = mBoard.makeMove(blocking);
-
-        if (serverMove == null) {
-            if (!mBoard.isInCenter(Board.SERVER)) {
-                serverMove = mBoard.makeCenterMove();
-            }
-        }
-        return serverMove;
-    }
-
-    private String makeSubsequentMoves() {
-        int winningMove = mBoard.getBlockingMove(Board.SERVER);
-        if (winningMove != -1) {
-            return mBoard.makeMove(winningMove);
-        }
-        int blockingMove = mBoard.getBlockingMove(Board.CLIENT);
-        if (blockingMove != -1) {
-            return mBoard.makeMove(blockingMove);
-        }
-        if (mBoard.isOnEdge(Board.CLIENT) && mBoard.isInCorner(Board.SERVER) && mBoard.isInCenter(Board.SERVER)) {
-            return mBoard.makeCornerMove();
-        }
-        return mBoard.makeDefaultMove();
+        mLastValidMove = null;
     }
 }

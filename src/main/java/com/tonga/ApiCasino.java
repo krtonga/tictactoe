@@ -1,7 +1,12 @@
 package com.tonga;
 
 import com.google.gson.Gson;
+import spark.Request;
+import spark.Response;
 import spark.ResponseTransformer;
+
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import static com.tonga.Board.BLANK;
 import static com.tonga.ApiCasino.JsonUtil.json;
@@ -17,29 +22,41 @@ public class ApiCasino {
     public static void main(String[] args) {
         port(getHerokuAssignedPort());
 
-        get("/tictactoe", "application/json", (req, res) -> {
+        get("/move", "application/json", (req, res) -> {
+            TicTacToeResponse response;
+            String clientMove = req.queryParams("board");
+            if (clientMove == null) {
+                response = new TicTacToeError(null);
+            }
+            else {
+                clientMove = clientMove.replaceAll(" ", String.valueOf(BLANK)); //TODO Use space for blank rather than +
+                response = respondTo(new Brains().makeOptimalMove(clientMove), null);
+            }
+            res.status(response.status);
+            return response;
+        }, json());
+
+        get("/play", "application/json", (req, res) -> {
             if (mGame == null) {
                 mGame = new Game();
             }
 
-            String board = req.queryParams("board");
-            if (board != null) {
-                board = board.replaceAll(" ", String.valueOf(BLANK)); //TODO Use space for blank rather than +
-                String serverMove = mGame.sendBoard(board);
-                if (serverMove == null) {
-                    res.status(400);
-                    return new TicTacToeError();
-                }
-                res.status(200);
-                serverMove = serverMove.replaceAll("\\" + BLANK, " ");
-                return new TicTacToeResponse(200, serverMove, mGame.getWinner());
+            TicTacToeResponse response;
+            String clientMove = req.queryParams("board");
+            if (clientMove == null) {
+                response = new TicTacToeError(mGame.getLastValidBoard());
             }
-            return new TicTacToeError();
+            else {
+                clientMove = clientMove.replaceAll(" ", String.valueOf(BLANK));
+                response = respondTo(mGame.playGame(clientMove), mGame.getLastValidBoard());
+            }
+            res.status(response.status);
+            return response;
         }, json());
 
-        get("/tictactoe/new", (req, res) -> {
-            mGame = new Game();
-            return new TicTacToeResponse(200, "+++++++++", BLANK);
+        get("/play-again", (req, res) -> {
+            mGame.resetGame();
+            return new ValidTicTacToeResponse(200, "+++++++++", BLANK);
         }, json());
 
         after((request, response) -> response.type("application/json"));
@@ -53,6 +70,14 @@ public class ApiCasino {
         return 4567;
     }
 
+    private static TicTacToeResponse respondTo(Brains.MoveResult serverMove, String lastMove) {
+        if (serverMove == null) {
+            return new TicTacToeError(lastMove);
+        }
+        String newBoard = serverMove.getServerMove().replaceAll("\\" + BLANK, " "); //TODO: And here
+        return new ValidTicTacToeResponse(200, newBoard, serverMove.getWinner());
+    }
+
     static class JsonUtil {
         static String toJson(Object object) {
             return new Gson().toJson(object);
@@ -63,12 +88,11 @@ public class ApiCasino {
         }
     }
 
-    static class TicTacToeResponse {
-        private int status;
+    static class ValidTicTacToeResponse extends TicTacToeResponse {
         private String board;
         private String winner;
 
-        TicTacToeResponse(int status, String board, char winner) {
+        ValidTicTacToeResponse(int status, String board, char winner) {
             this.status = status;
             this.board = board;
             if (winner != BLANK) {
@@ -77,18 +101,18 @@ public class ApiCasino {
         }
     }
 
-    static class TicTacToeError {
-        private int status;
+    static class TicTacToeError extends TicTacToeResponse {
         private String error;
         private String lastValid;
 
-        TicTacToeError() {
+        TicTacToeError(String lastValid) {
             this.status = 400;
-            this.lastValid = mGame.getLastValidBoard();
-            if (lastValid == null) {
-                this.error = "Please send a valid start board. For example: +++++++++";
-            }
+            this.lastValid = lastValid;
             this.error = "Invalid move.";
         }
+    }
+
+    static class TicTacToeResponse {
+        int status = 0;
     }
 }

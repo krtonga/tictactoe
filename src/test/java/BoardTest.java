@@ -41,17 +41,24 @@ public class BoardTest {
     }
 
     @Test
-    public void testUpdate() {
+    public void testIsValidUpdate() {
         mBoard = new Board("o++++++++");
-        assertTrue(mBoard.update("o++x+++++"));
-        assertEquals("o++x+++++", mBoard.toString());
+        assertTrue(mBoard.isValidUpdate("o++x+++++"));
+        assertEquals("o++++++++", mBoard.toString());
 
         String[] invalidUpdates = {"o++++++++", "+o+++++++","xo+++++++","oxx++++++","+++"};
         for (String board : invalidUpdates) {
             mBoard = new Board("o++x+++++");
-            assertFalse("Board ("+board+") is not a valid update.", mBoard.update(board));
+            assertFalse("Board ("+board+") is not a valid isValidUpdate.", mBoard.isValidUpdate(board));
             assertEquals("o++x+++++", mBoard.toString());
         }
+    }
+
+    @Test
+    public void testUpdate() {
+        mBoard = new Board("o++++++++");
+        mBoard.updateBoard("o++x+++++");
+        assertEquals("o++x+++++", mBoard.toString());
     }
 
     @Test
@@ -73,6 +80,31 @@ public class BoardTest {
     public void getLastO() {
         Board board = new Board("+ox++++++");
         assertEquals(1, board.getAnO());
+    }
+
+    @Test
+    public void getCountOfMovesForPlayers() {
+        Board board = new Board("+++++++++");
+        assertEquals(0, board.getMoveCounts().getTotalNumOfMoves());
+        assertTrue(board.getMoveCounts().isValidMove());
+
+        board = new Board("++xo+++++");
+        assertEquals(2, board.getMoveCounts().getTotalNumOfMoves());
+        assertEquals(1, board.getMoveCounts().getNumOfClientMoves());
+        assertEquals(1, board.getMoveCounts().getNumOfServerMoves());
+        assertTrue(board.getMoveCounts().isValidMove());
+
+        board = new Board("xoxo++x++");
+        assertEquals(5, board.getMoveCounts().getTotalNumOfMoves());
+        assertEquals(3, board.getMoveCounts().getNumOfClientMoves());
+        assertEquals(2, board.getMoveCounts().getNumOfServerMoves());
+        assertTrue(board.getMoveCounts().isValidMove());
+
+        board = new Board("xxxxxx+ox");
+        assertFalse(board.getMoveCounts().isValidMove());
+
+        board = new Board("xoo++++ox");
+        assertFalse(board.getMoveCounts().isValidMove());
     }
 
     @Test
