@@ -3,30 +3,33 @@ This simple tic tac toe api is deployed on heroku.
 The following link will start a game where the server makes the first move: https://tictactoe-upon-the-wavy-sea.herokuapp.com/tictactoe?board=+++++++++
 
 ## Endpoints
+To get the optimal move for a given board, send a GET to the following:
+`https://tictactoe-upon-the-wavy-sea.herokuapp.com/move?board=+x+++++++`
+
 To start a game, or send a move, send a GET to the following:
-`https://tictactoe-upon-the-wavy-sea.herokuapp.com/tictactoe?board=+x+++++++`
+`https://tictactoe-upon-the-wavy-sea.herokuapp.com/play?board=+x+++++++`
 
 *Note: Boards should be 9 characters. Client is always x, and server is always o. If you send an empty board, server will make the first move.*
 
 To abort a game, and start again from scratch, send a GET to the following:
-`https://tictactoe-upon-the-wavy-sea.herokuapp.com/tictactoe/new`
+`https://tictactoe-upon-the-wavy-sea.herokuapp.com/play-again`
 
 
 ## Request/Response Examples
 Here are some sample requests and responses:
 
 **A move:**
-- REQUEST: `https://tictactoe-upon-the-wavy-sea.herokuapp.com/tictactoe?board=+x+++++++`
+- REQUEST: `https://tictactoe-upon-the-wavy-sea.herokuapp.com/move?board=+x+++++++`
 - RESPONSE: `{"status":200,"board":"ox       "}`
 
 **A win:**
-- REQUEST: `https://tictactoe-upon-the-wavy-sea.herokuapp.com/tictactoe?board=ox++o+x++`
+- REQUEST: `https://tictactoe-upon-the-wavy-sea.herokuapp.com/move?board=ox++o+x++`
 - RESPONSE: `{"status":200,"board":"ox  o x o","winner":"o"}`
 
 **An error:**
-- REQUEST: `https://tictactoe-upon-the-wavy-sea.herokuapp.com/tictactoe?board=oxx+++++++`
+- REQUEST: `https://tictactoe-upon-the-wavy-sea.herokuapp.com/play?board=oxx+++++++`
 - RESPONSE: `{"status":400,"error":"Invalid move.","lastValid":"o++++++++"}`
 
 **A new game:**
-- REQUEST: `https://tictactoe-upon-the-wavy-sea.herokuapp.com/tictactoe/new`
+- REQUEST: `https://tictactoe-upon-the-wavy-sea.herokuapp.com/play-again`
 - RESPONSE: `{"status":200,"board":"+++++++++"}`
