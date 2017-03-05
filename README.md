@@ -18,18 +18,22 @@ To abort a game, and start again from scratch, send a GET to the following:
 ## Request/Response Examples
 Here are some sample requests and responses:
 
-**A move:**
+**A move query:**
 - REQUEST: `https://tictactoe-upon-the-wavy-sea.herokuapp.com/move?board=+x+++++++`
-- RESPONSE: `{"status":200,"board":"ox       "}`
+- RESPONSE: `ox       `
 
-**A win:**
-- REQUEST: `https://tictactoe-upon-the-wavy-sea.herokuapp.com/move?board=ox++o+x++`
+**A move error:**
+- REQUEST: `https://tictactoe-upon-the-wavy-sea.herokuapp.com/move?board=+x+++++++`
+- RESPONSE: `Error 400. Some error message`
+
+**A play. A win:**
+- REQUEST: `https://tictactoe-upon-the-wavy-sea.herokuapp.com/play?board=ox++o+x++`
 - RESPONSE: `{"status":200,"board":"ox  o x o","winner":"o"}`
 
-**An error:**
+**A play. An error:**
 - REQUEST: `https://tictactoe-upon-the-wavy-sea.herokuapp.com/play?board=oxx+++++++`
 - RESPONSE: `{"status":400,"error":"Invalid move.","lastValid":"o++++++++"}`
 
-**A new game:**
+**A new game request:**
 - REQUEST: `https://tictactoe-upon-the-wavy-sea.herokuapp.com/play-again`
 - RESPONSE: `{"status":200,"board":"+++++++++"}`

@@ -23,18 +23,26 @@ public class ApiCasino {
         port(getHerokuAssignedPort());
 
         get("/move", "application/json", (req, res) -> {
-            TicTacToeResponse response;
+            String response;
             String clientMove = req.queryParams("board");
             if (clientMove == null) {
-                response = new TicTacToeError(null);
+                res.status(400);
+                response = "Error 400. Please send a board parameter (for example: /move?board=+xxxxxxxx).";
             }
             else {
                 clientMove = clientMove.replaceAll(" ", String.valueOf(BLANK)); //TODO Use space for blank rather than +
-                response = respondTo(new Brains().makeOptimalMove(clientMove), null);
+                Brains.MoveResult serverMove = new Brains().makeOptimalMove(clientMove);
+                if (serverMove == null) {
+                    res.status(400);
+                    response = "Error 400. Invalid board.";
+                }
+                else {
+                    res.status(200);
+                    response = serverMove.getServerMove();
+                }
             }
-            res.status(response.status);
             return response;
-        }, json());
+        });
 
         get("/play", "application/json", (req, res) -> {
             if (mGame == null) {
