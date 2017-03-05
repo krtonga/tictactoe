@@ -1,12 +1,8 @@
 package com.tonga;
 
 import com.google.gson.Gson;
-import spark.Request;
-import spark.Response;
 import spark.ResponseTransformer;
 
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 import static com.tonga.Board.BLANK;
 import static com.tonga.ApiCasino.JsonUtil.json;
@@ -38,6 +34,7 @@ public class ApiCasino {
                 }
                 else {
                     res.status(200);
+                    res.type("text/plain");
                     response = serverMove.getServerMove();
                 }
             }
@@ -59,15 +56,17 @@ public class ApiCasino {
                 response = respondTo(mGame.playGame(clientMove), mGame.getLastValidBoard());
             }
             res.status(response.status);
+            res.type("application/json");
             return response;
         }, json());
 
         get("/play-again", (req, res) -> {
             mGame.resetGame();
+            res.status(200);
+            res.type("application/json");
             return new ValidTicTacToeResponse(200, "+++++++++", BLANK);
-        }, json());
 
-        after((request, response) -> response.type("application/json"));
+        }, json());
     }
 
     private static int getHerokuAssignedPort() {
